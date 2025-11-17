@@ -10,19 +10,17 @@ class Query extends Model
     use HasFactory;
 
     protected $fillable = [
-        'employee_id',
         'problem_statement',
-        'problem_description',
-        'name',
-        'phone_number',
+        'description',
         'company_name',
-        'email'
+        'phone_number',
+        'name',
+        'email',
+        'photo',  
     ];
-    
+
     public function assignCalls()
     {
         return $this->hasMany(AssignCall::class, 'query_id');
     }
-    
-
 }

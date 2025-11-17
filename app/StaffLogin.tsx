@@ -10,7 +10,7 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import BASE_URL from "../.expo/src/config";
+import BASE_URL from "../src/config";
 
 export default function StaffLogin() {
   const router = useRouter();
@@ -18,28 +18,28 @@ export default function StaffLogin() {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    try {
-      const response = await axios.post(`${BASE_URL}/api/stafflogin`, {
-        email: email,
-        password: password,
-      });
+  if (!email || !password) {
+    Alert.alert("Error", "Email and password required");
+    return;
+  }
 
-      if (response.status === 200) {
-        Alert.alert("Success", "Login successful");
-        const { token } = response.data;
-        console.log("Auth Token:", token);
-        router.push("/DisplayQueryStaff"); // Navigate to DisplayQuery page
-      }
-    } catch (error: any) {
-      if (error.response && error.response.status === 401) {
-        Alert.alert("Error", "Invalid credentials. Please try again.");
-      } else if (error.response && error.response.status === 404) {
-        Alert.alert("Error", "Email doesn't exist. Kindly sign up.");
-      } else {
-        Alert.alert("Error", "Something went wrong. Please try later.");
-      }
-    }
-  };
+  try {
+    const response = await axios.post(`${BASE_URL}/api/stafflogin`, {
+      email,
+      password,
+    });
+
+    console.log("LOGIN RESPONSE: ", response.data);
+
+    Alert.alert("Success", "Login successful!");
+
+    router.push("/DisplayQueryStaff");
+  } catch (error: any) {
+    console.log("LOGIN ERROR:", error.response?.data || error);
+    Alert.alert("Error", error.response?.data?.message || "Login failed");
+  }
+};
+
 
   return (
     <View style={styles.container}>

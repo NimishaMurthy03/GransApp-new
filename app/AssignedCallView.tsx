@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import BASE_URL from "../.expo/src/config";
+import BASE_URL from "../src/config";
 
 export default function AssignedCallView() {
   const { queryId } = useLocalSearchParams();

@@ -14,18 +14,19 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/emplogin', [AuthController::class, 'empLogin']);
-Route::get('/empsignup', [AuthController::class, 'empSignup']);
+Route::post('/empsignup', [AuthController::class, 'empSignup']);
+Route::post('/updatepassword', [AuthController::class, 'updatePassword']);
 
-Route::post('/postQuery/{id}', [QueryController::class, 'store']); 
+Route::post('/postQuery', [QueryController::class, 'store']);
 Route::get('/query', [QueryController::class, 'getQuery']); 
 Route::get("/getAllQueriesAndAssignedEngineers",[QueryController::class, 'getAllQueriesAndAssignedEngineers']);
 
 Route::post('/stafflogin', [StaffController::class, 'staffLogin']);
-Route::get('/staffsignup', [StaffController::class, 'staffSignup']); 
+Route::post('/staffsignup', [StaffController::class, 'staffSignup']); 
 
 Route::get('/displayquerystaff', [QueryDisplayController::class, 'displayQueries']);
 
-Route::post("/superAdminLogin", [SuperAdminController::class, 'superAdminLogin']);
+//Route::post("/superAdminLogin", [SuperAdminController::class, 'superAdminLogin']);
 
 Route::post('/assign-calls', [AssignCallController::class, 'store']);
 Route::get('/assign-calls/query/{queryId}', [AssignCallController::class, 'showByQueryId']);

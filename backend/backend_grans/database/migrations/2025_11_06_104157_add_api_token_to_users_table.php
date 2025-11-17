@@ -9,20 +9,21 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('queries', function (Blueprint $table) {
-            $table->string('problem_description')->nullable()->change();
-        });
-    }
+   public function up()
+{
+    Schema::table('users', function (Blueprint $table) {
+        $table->string('api_token', 80)->unique()->nullable()->after('password');
+    });
+}
+
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::table('queries', function (Blueprint $table) {
-            $table->string('problem_description');
+        Schema::table('users', function (Blueprint $table) {
+            //
         });
     }
 };

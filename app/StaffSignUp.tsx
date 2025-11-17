@@ -10,7 +10,7 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import BASE_URL from "../.expo/src/config";
+import BASE_URL from "../src/config";
 
 export default function SignUp(): JSX.Element {
   const router = useRouter();
@@ -29,13 +29,12 @@ export default function SignUp(): JSX.Element {
     setLoading(true);
 
     try {
-      const response = await axios.get(`${BASE_URL}/api/staffsignup`, {
-        params: {
-          name,
-          email,
-          password,
-        },
-      });
+      const response = await axios.post(`${BASE_URL}/api/staffsignup`, {
+  name,
+  email,
+  password,
+});
+
 
       if (response.status === 200) {
         Alert.alert("Success", "Registration successful!");

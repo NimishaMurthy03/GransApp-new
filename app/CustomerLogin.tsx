@@ -7,50 +7,36 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import axios from "axios";
-import BASE_URL from "../.expo/src/config";
+import BASE_URL from "../src/config";
 
 export default function CustomerLogin() {
   const router = useRouter();
-  const [id, setId] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     try {
       const response = await axios.post(`${BASE_URL}/api/emplogin`, {
-        email: email,
-        password: password,
+        email,
+        password,
       });
-
       if (response.status === 200) {
         Alert.alert("Success", "Login successful");
-        const { token } = response.data;
-        console.log("Auth Token:", token);
-        router.push("/Query"); // Navigate to Query page
+        router.push("/Query");
       }
     } catch (error: any) {
-      if (error.response && error.response.status === 401) {
-        Alert.alert("Error", "Invalid credentials. Please try again.");
-      } else if (error.response && error.response.status === 404) {
-        Alert.alert("Error", "Email doesn't exist. Kindly sign up.");
-      } else {
-        Alert.alert("Error", "Something went wrong. Please try later.");
-      }
+      Alert.alert("Error", "Invalid credentials or user not found.");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Customer Portal</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Id"
-        value={id}
-        onChangeText={setId}
-        placeholderTextColor="#aaa"
-      />
+      <Text style={styles.title}>Customer Login</Text>
+
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -58,16 +44,33 @@ export default function CustomerLogin() {
         onChangeText={setEmail}
         placeholderTextColor="#aaa"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-        placeholderTextColor="#aaa"
-      />
+
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={[styles.input, { flex: 1 }]}
+          placeholder="Password"
+          secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity
+          onPress={() => setShowPassword(!showPassword)}
+          style={styles.eyeIcon}
+        >
+          <Ionicons
+            name={showPassword ? "eye-off" : "eye"}
+            size={22}
+            color="#555"
+          />
+        </TouchableOpacity>
+      </View>
+
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => router.push("/ForgotPassword")}>
+        <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
     </View>
   );
@@ -78,8 +81,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
     backgroundColor: "#f5f5f5",
+    padding: 20,
   },
   title: {
     fontSize: 28,
@@ -98,6 +101,12 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     fontSize: 16,
   },
+  passwordContainer: {
+    width: "90%",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  eyeIcon: { position: "absolute", right: 15 },
   button: {
     width: "90%",
     height: 50,
@@ -105,11 +114,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
-    insetBlockEnd: 10,
+    marginBottom: 10,
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+  buttonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  forgotText: { color: "#007AFF", marginTop: 10, textDecorationLine: "underline" },
 });

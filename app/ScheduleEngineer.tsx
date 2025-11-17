@@ -4,7 +4,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import axios from "axios";
-import BASE_URL from "@/.expo/src/config";
+import BASE_URL from "../src/config";
 
 export default function ScheduleEngineer() {
   const [selectedEngineer, setSelectedEngineer] = useState("");

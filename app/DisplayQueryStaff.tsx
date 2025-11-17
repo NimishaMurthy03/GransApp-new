@@ -2,17 +2,21 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Button,
+  Image,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  Modal,
+  TouchableWithoutFeedback,
 } from "react-native";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import BASE_URL from "../.expo/src/config";
+import BASE_URL from "../src/config";
 
-export default function Staff() {
+export default function DisplayQueryStaff() {
   const [queries, setQueries] = useState<any[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -21,155 +25,198 @@ export default function Staff() {
 
   const fetchQueries = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/api/displayquerystaff`, {
-        headers: { "Content-Type": "text/plain" },
-      });
-      setQueries(response.data);
-    } catch (error: any) {
-      console.error("Error fetching queries:", error);
+      const response = await axios.get(`${BASE_URL}/api/displayquerystaff`);
 
-      if (error.response && Array.isArray(error.response.data)) {
-        setQueries(error.response.data);
-      } else {
-        console.error("Expected an array but got:", error.response?.data);
-        setQueries([]);
+      if (Array.isArray(response.data)) {
+        const updated = response.data.map((q) => ({
+          ...q,
+          photo:
+            q.photo && !q.photo.startsWith("http")
+              ? `${BASE_URL}/uploads/queries/${q.photo}`
+              : q.photo,
+        }));
+        setQueries(updated);
       }
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
 
-  const handleAssignCalls = (queryId: string) => {
-    router.push({
-      pathname: "/ScheduleEngineer",
-      params: { queryId },
-    });
+  const openImage = (img: string) => {
+    setSelectedImage(img);
+    setIsModalVisible(true);
+  };
+
+  const closeImage = () => {
+    setSelectedImage(null);
+    setIsModalVisible(false);
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Query Display</Text>
+
       <ScrollView contentContainerStyle={styles.scrollView}>
         {queries.map((query, index) => (
-          <View key={index} style={styles.queryCard}>
-            <Text style={styles.queryLabel}>
-              Query ID:
-              <Text style={styles.queryText}> {query.id || "N/A"}</Text>
-            </Text>
+          <View key={index} style={styles.card}>
 
-            <Text style={styles.queryLabel}>
-              Problem Statement:
-              <Text style={styles.queryText}>
-                {query.problem_statement || "Unknown"}
-              </Text>
-            </Text>
-
-            <Text style={styles.queryLabel}>Problem Description:</Text>
-            <Text style={styles.queryText}>
-              {query.problem_description || "No issue description"}
-            </Text>
-
-            <Text style={styles.queryLabel}>
-              Name:
-              <Text style={styles.queryText}>
-                {query.name || "No issue description"}
-              </Text>
-            </Text>
-
-            <Text style={styles.queryLabel}>
-              Phone number:
-              <Text style={styles.queryText}>
-                {query.phone_number || "No issue description"}
-              </Text>
-            </Text>
-
-            <Text style={styles.queryLabel}>
-              Company Name:
-              <Text style={styles.queryText}>
-                {query.company_name || "No issue description"}
-              </Text>
-            </Text>
-
-            <Text style={styles.queryLabel}>
-              Email:
-              <Text style={styles.queryText}>
-                {query.email || "No issue description"}
-              </Text>
-            </Text>
-
-            {query.has_assigned_call ? (
+            {/* ==== IMAGE FIRST ==== */}
+            {query.photo ? (
               <TouchableOpacity
-                style={[styles.assignButton, { backgroundColor: "#2ecc71" }]} // green
-                onPress={() =>
-                  router.push({
-                    pathname: "/AssignedCallView",
-                    params: { queryId: query.id },
-                  })
-                }
+                onPress={() => openImage(query.photo)}
+                style={styles.imageWrapper}
               >
-                <Text style={styles.buttonText}>View Assigned Call</Text>
+                <Image source={{ uri: query.photo }} style={styles.image} />
+                <Text style={styles.tapText}>Tap to view photo</Text>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity
-                style={styles.assignButton}
-                onPress={() => handleAssignCalls(query.id)}
-              >
-                <Text style={styles.buttonText}>Assign Call</Text>
-              </TouchableOpacity>
+              <Text style={styles.noImage}>No image uploaded</Text>
             )}
+
+            {/* ==== DETAILS ==== */}
+            <Text style={styles.label}>
+              Query ID: <Text style={styles.value}>{query.id}</Text>
+            </Text>
+
+            <Text style={styles.label}>
+              Problem: <Text style={styles.value}>{query.problem_statement}</Text>
+            </Text>
+
+            <Text style={styles.label}>
+              Description: <Text style={styles.value}>{query.description}</Text>
+            </Text>
+
+            <Text style={styles.label}>
+              Name: <Text style={styles.value}>{query.name}</Text>
+            </Text>
+
+            <Text style={styles.label}>
+              Phone: <Text style={styles.value}>{query.phone_number}</Text>
+            </Text>
+
+            <Text style={styles.label}>
+              Company: <Text style={styles.value}>{query.company_name}</Text>
+            </Text>
+
+            <Text style={styles.label}>
+              Email: <Text style={styles.value}>{query.email}</Text>
+            </Text>
+
+            {/* Assign Button */}
+            <TouchableOpacity
+              style={styles.assignBtn}
+              onPress={() =>
+                router.push({
+                  pathname: "/ScheduleEngineer",
+                  params: { queryId: query.id },
+                })
+              }
+            >
+              <Text style={styles.assignText}>Assign Call</Text>
+            </TouchableOpacity>
           </View>
         ))}
       </ScrollView>
+
+      {/* ===== FULL IMAGE MODAL ===== */}
+      <Modal visible={isModalVisible} transparent>
+        <TouchableWithoutFeedback onPress={closeImage}>
+          <View style={styles.modalContainer}>
+            {selectedImage && (
+              <Image
+                source={{ uri: selectedImage }}
+                style={styles.fullImage}
+                resizeMode="contain"
+              />
+            )}
+            <Text style={styles.closeText}>Tap anywhere to close</Text>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 }
+
+/* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f4f6f9",
-    paddingHorizontal: 20,
-    paddingTop: 50,
+    padding: 15,
   },
   title: {
     fontSize: 26,
     fontWeight: "bold",
     color: "#2c3e50",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 15,
   },
   scrollView: {
-    paddingBottom: 30,
+    paddingBottom: 25,
   },
-  queryCard: {
-    backgroundColor: "#ffffff",
+  card: {
+    backgroundColor: "#fff",
+    padding: 18,
     borderRadius: 12,
-    padding: 20,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
+    marginBottom: 18,
+    elevation: 3,
   },
-  queryLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#7f8c8d",
-  },
-  queryText: {
-    fontSize: 16,
-    color: "#34495e",
+  imageWrapper: {
+    alignItems: "center",
     marginBottom: 10,
   },
-  assignButton: {
-    marginTop: 10,
-    backgroundColor: "#5dade2",
-    paddingVertical: 10,
+  image: {
+    width: "100%",
+    height: 180,
+    borderRadius: 10,
+  },
+  tapText: {
+    marginTop: 5,
+    textAlign: "center",
+    color: "#2980b9",
+    fontStyle: "italic",
+  },
+  label: {
+    fontWeight: "600",
+    color: "#444",
+    marginTop: 5,
+  },
+  value: {
+    color: "#000",
+    fontWeight: "500",
+  },
+  assignBtn: {
+    marginTop: 12,
+    backgroundColor: "#3498db",
+    paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
   },
-  buttonText: {
+  assignText: {
     color: "#fff",
-    fontWeight: "600",
     fontSize: 16,
+    fontWeight: "600",
+  },
+  noImage: {
+    fontStyle: "italic",
+    textAlign: "center",
+    color: "#aaa",
+    marginBottom: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.95)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fullImage: {
+    width: "90%",
+    height: "80%",
+  },
+  closeText: {
+    color: "#fff",
+    fontSize: 15,
+    marginTop: 10,
   },
 });

@@ -7,10 +7,16 @@ use Illuminate\Http\Request;
 
 class QueryDisplayController extends Controller
 {
-    public function displayQueries()
+public function displayQueries()
 {
-    $queries = Query::all();
-    return response()->json($queries); 
-}
+    $queries = \App\Models\Query::all();
 
+    foreach ($queries as $query) {
+        if ($query->photo) {
+            $query->photo = url('uploads/queries/' . $query->photo);
+        }
+    }
+
+    return response()->json($queries);
+}
 }

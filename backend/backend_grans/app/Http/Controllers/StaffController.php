@@ -3,67 +3,86 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Staff;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+use App\Models\OfficeStaff;   // ✅ FIXED
+use Illuminate\Support\Facades\Auth;
 
 class StaffController extends Controller
 {
-    public function staffLogin(Request $request)
-{
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required|min:6',
-    ]);
+    // ============================
+    // STAFF SIGNUP
+    // ============================
+    public function staffSignup(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:office_staff,email',
+            'password' => 'required|min:4'
+        ]);
 
-    $user = Staff::where('email', $request->email)->first();
-
-    if (!$user) {
-        return response()->json([
-            'message' => 'Email not found.',
-        ], 404);
-    }
-
-    if (!Hash::check($request->password, $user->password)) {
-        return response()->json([
-            'message' => 'Invalid email or password.',
-        ], 401);
-    }
-
-    // Generate authentication token (Sanctum required)
-    $token = $user->createToken('YourAppName')->plainTextToken;
-
-    return response()->json([
-        'message' => 'Login successful',
-        'token' => $token,
-    ], 200);
-}
-
-    
-        public function staffSignup(Request $request){
-            $validator = Validator::make($request->all(),[
-                'name' => 'required|string',
-                'email' => 'required|email',
-                'password' => 'required|min:8',
-            ]);
-    
-            if($validator->fails()){
-                return response()->json([
-                    'success' => false,
-                    'message' => $validator->errors(),
-                ],400);
-            }
-    
-            $user = Staff::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-             ]);
-    
-             return response()->json([
-                'message' => 'Employee signed up successfully!',
-                'data' => $request->all()
-            ]);
-    
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => "Validation error",
+                'errors'  => $validator->errors()
+            ], 422);
         }
+
+        $staff = OfficeStaff::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'phone'    => $request->phone,
+            'password' => Hash::make($request->password)
+        ]);
+
+        return response()->json([
+            'message' => "Staff registered successfully",
+            'staff'   => $staff
+        ], 200);
+    }
+
+
+    // ============================
+    // STAFF LOGIN
+    // ============================
+    public function staffLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email'    => 'required|email',
+            'password' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => "Validation error",
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        // Check Email
+        $staff = OfficeStaff::where('email', $request->email)->first();
+
+        if (!$staff) {
+            return response()->json([
+                'message' => "Email not found"
+            ], 404);
+        }
+
+        // Check Password
+        if (!Hash::check($request->password, $staff->password)) {
+            return response()->json([
+                'message' => "Incorrect password"
+            ], 401);
+        }
+
+        // Create Sanctum token
+        $token = $staff->createToken("staff_token")->plainTextToken;
+
+        return response()->json([
+            'message' => "Staff login successful",
+            'token'   => $token,
+            'staff'   => $staff
+        ], 200);
+    }
 }
+

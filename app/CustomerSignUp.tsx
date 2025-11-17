@@ -8,16 +8,17 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import axios from "axios";
-import BASE_URL from "../.expo/src/config";
+import BASE_URL from "../src/config";
 
-export default function SignUp() {
+export default function CustomerSignUp() {
   const router = useRouter();
-  const [id, setId] = useState("");
-  const [name, setname] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
@@ -27,28 +28,22 @@ export default function SignUp() {
     }
 
     setLoading(true);
-
     try {
-      const response = await axios.get(`${BASE_URL}/api/empsignup`, {
-        params: {
-          id,
-          name,
-          email,
-          password,
-        },
+      const response = await axios.post(`${BASE_URL}/api/empsignup`, {
+        name,
+        email,
+        password,
       });
 
       if (response.status === 200) {
-        Alert.alert("Success", "Registration successful!");
-        console.log("Redirecting to /Query");
-        router.push("/Query");
+        Alert.alert("Success", "Account created successfully!");
+        router.push("/CustomerLogin"); // Redirect to Login page
       }
     } catch (error: any) {
       console.error("Signup error:", error.response?.data || error.message);
       Alert.alert(
         "Error",
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
+        error.response?.data?.message || "Signup failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -61,37 +56,43 @@ export default function SignUp() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
+      <Text style={styles.title}>Customer Sign Up</Text>
+
       <TextInput
         style={styles.input}
-        placeholder="id"
-        value={id}
-        onChangeText={setId}
-        placeholderTextColor="#aaa"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="name"
+        placeholder="Name"
         value={name}
-        onChangeText={setname}
-        placeholderTextColor="#aaa"
+        onChangeText={setName}
       />
+
       <TextInput
         style={styles.input}
         placeholder="Email"
+        keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
-        placeholderTextColor="#aaa"
-        keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-        placeholderTextColor="#aaa"
-      />
+
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={[styles.input, { flex: 1 }]}
+          placeholder="Password"
+          secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity
+          onPress={() => setShowPassword(!showPassword)}
+          style={styles.eyeIcon}
+        >
+          <Ionicons
+            name={showPassword ? "eye-off" : "eye"}
+            size={22}
+            color="#555"
+          />
+        </TouchableOpacity>
+      </View>
+
       <TouchableOpacity
         style={styles.button}
         onPress={handleSignUp}
@@ -104,13 +105,14 @@ export default function SignUp() {
         )}
       </TouchableOpacity>
 
-      <Text style={styles.infoText}>If an account already exists,</Text>
-      <TouchableOpacity onPress={navigateToLogin}>
-        <Text style={styles.loginText}>Login</Text>
-      </TouchableOpacity>
+      <View style={styles.bottomTextContainer}>
+        <Text style={styles.infoText}>Already have an account?</Text>
+        <TouchableOpacity onPress={navigateToLogin}>
+          <Text style={styles.loginText}>Login</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
-  console.log("hello wasup");
 }
 
 const styles = StyleSheet.create({
@@ -122,51 +124,50 @@ const styles = StyleSheet.create({
     backgroundColor: "#f7f9fc",
   },
   title: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: "bold",
-    marginBottom: 40,
-    color: "#333", // Darker text for better readability
+    marginBottom: 30,
+    color: "#333",
   },
   input: {
-    width: "90%", // Adjusted width for better alignment
+    width: "90%",
     height: 50,
     borderWidth: 1,
-    borderColor: "#ccc", // Subtle border color
+    borderColor: "#ccccccff",
     backgroundColor: "#fff",
     borderRadius: 10,
     paddingHorizontal: 15,
     marginBottom: 15,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2, // Shadow for Android
   },
+  passwordContainer: {
+    width: "90%",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  eyeIcon: { position: "absolute", right: 15 },
   button: {
     width: "90%",
     height: 50,
-    backgroundColor: "#007AFF", // Vibrant blue color for the button
+    backgroundColor: "#007AFF",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20,
+    marginTop: 10,
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-
-  infoText: {
+  buttonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  bottomTextContainer: {
     marginTop: 20,
+    alignItems: "center",
+  },
+  infoText: {
     fontSize: 16,
-    color: "#666", // Slightly muted color for secondary text
+    color: "#555",
   },
   loginText: {
-    marginTop: 5,
     fontSize: 16,
-    color: "#2b0f73", // A more vibrant blue color for the link
+    color: "#007AFF",
     textDecorationLine: "underline",
-    fontWeight: "500", // Slightly bolder text for emphasis
+    marginTop: 5,
+    fontWeight: "600",
   },
 });

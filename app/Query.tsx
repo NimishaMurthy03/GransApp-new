@@ -7,62 +7,94 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
+  Image,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import BASE_URL from "../.expo/src/config";
+import BASE_URL from "../src/config";
 
 export default function PostQuery() {
   const router = useRouter();
-  const [id, setId] = useState("");
+
   const [problemStatement, setProblemStatement] = useState("");
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
+  const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async () => {
-    if (
-      !problemStatement ||
-      !description ||
-      !name ||
-      !phone ||
-      !companyName ||
-      !email
-    ) {
-      Alert.alert("Error", "All fields are required.");
-      return;
-    }
+  // ------------------ PICK IMAGE ------------------
+  const pickImage = async () => {
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
-    setLoading(true);
-
-    try {
-      const response = await axios.post(`${BASE_URL}/api/postQuery/${id}`, {
-        problem_statement: problemStatement,
-        problem_description: description,
-        company_name: companyName,
-        phone_number: phone,
-        name: name,
-        email: email,
-      });
-
-      if (response.status === 200) {
-        Alert.alert("Success", "Query submitted successfully!");
-        router.push("/Query");
-      }
-    } catch (error: any) {
-      console.error("Signup error:", error.response?.data || error.message);
-      Alert.alert(
-        "Error",
-        error.response?.data?.message || "Something went wrong."
-      );
-    } finally {
-      setLoading(false);
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
     }
   };
+
+  // ------------------ SUBMIT FORM ------------------
+  const handleSubmit = async () => {
+  if (!problemStatement || !description || !name || !phone || !companyName || !email) {
+    Alert.alert("Error", "All fields are required.");
+    return;
+  }
+
+  if (!image) {
+    Alert.alert("Error", "Please upload a photo.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("problem_statement", problemStatement);
+  formData.append("description", description);
+  formData.append("company_name", companyName);
+  formData.append("phone_number", phone);
+  formData.append("name", name);
+  formData.append("email", email);
+
+  // ---- SAFE FILENAME ----
+  const uriParts = image.split(".");
+const fileType = uriParts[uriParts.length - 1];
+
+formData.append(
+  "photo",
+  {
+    uri: image,
+    name: `photo_${Date.now()}.${fileType}`,
+    type: `image/${fileType}`,
+  } as any   // ← THIS FIXES TS ERROR
+);
+
+
+
+  
+
+  setLoading(true);
+
+  try {
+    const response = await axios.post(`${BASE_URL}/api/postQuery`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    Alert.alert("Success", "Query submitted successfully!");
+    router.push("/Query");
+  } catch (error: any) {
+    console.log("FULL ERROR:", JSON.stringify(error?.response?.data ?? error, null, 2));
+    Alert.alert("Error", "Failed to submit query.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -82,133 +114,105 @@ export default function PostQuery() {
         </Picker>
       </View>
 
-      <Text style={styles.label}>Id</Text>
-      <TextInput
-        style={styles.input}
-        value={id}
-        onChangeText={setId}
-        placeholderTextColor="#aaa"
-      />
-
-      <Text style={styles.label}>Problem Description (max 150 words)</Text>
+      <Text style={styles.label}>Description</Text>
       <TextInput
         style={styles.textArea}
-        placeholder="Describe your problem..."
         value={description}
         onChangeText={setDescription}
         multiline
-        maxLength={150}
-        placeholderTextColor="#aaa"
+        placeholder="Describe the issue"
       />
 
+      <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
+        <Text style={styles.cameraButtonText}>📸 Upload Photo</Text>
+      </TouchableOpacity>
+
+      {image && (
+        <Image source={{ uri: image }} style={styles.previewImage} />
+      )}
+
       <Text style={styles.label}>Name</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your name"
-        value={name}
-        onChangeText={setName}
-        placeholderTextColor="#aaa"
-      />
+      <TextInput style={styles.input} value={name} onChangeText={setName} />
 
       <Text style={styles.label}>Phone</Text>
       <TextInput
         style={styles.input}
-        placeholder="Enter your phone number"
         value={phone}
         onChangeText={setPhone}
         keyboardType="phone-pad"
-        placeholderTextColor="#aaa"
       />
 
-      <Text style={styles.label}>Company Name</Text>
+      <Text style={styles.label}>Company</Text>
       <TextInput
         style={styles.input}
-        placeholder="Enter your company name"
         value={companyName}
         onChangeText={setCompanyName}
-        placeholderTextColor="#aaa"
       />
 
       <Text style={styles.label}>Email</Text>
       <TextInput
         style={styles.input}
-        placeholder="Enter your email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
-        placeholderTextColor="#aaa"
       />
 
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        {loading ? (
-          <Text style={styles.buttonText}>Submitting...</Text>
-        ) : (
-          <Text style={styles.buttonText}>Submit</Text>
-        )}
+        <Text style={styles.buttonText}>
+          {loading ? "Submitting..." : "Submit"}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: "#f5f5f5",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-    color: "#333",
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: "#555",
-  },
+  container: { padding: 20, backgroundColor: "#fafafa" },
+  title: { fontSize: 26, fontWeight: "bold", textAlign: "center" },
+  label: { marginTop: 12, fontWeight: "600" },
   pickerContainer: {
-    borderColor: "#ddd",
     borderWidth: 1,
+    borderColor: "#ccc",
     borderRadius: 8,
-    marginBottom: 15,
-    backgroundColor: "#fff",
+    backgroundColor: "white",
+    marginBottom: 10,
   },
-  picker: {
-    height: 50,
-    width: "100%",
-  },
+  picker: { height: 50 },
   textArea: {
-    height: 100,
-    borderColor: "#ddd",
     borderWidth: 1,
+    borderColor: "#ccc",
     borderRadius: 8,
-    paddingHorizontal: 15,
-    backgroundColor: "#fff",
-    textAlignVertical: "top",
-    marginBottom: 15,
+    height: 100,
+    backgroundColor: "white",
+    padding: 10,
+  },
+  cameraButton: {
+    backgroundColor: "#3498db",
+    padding: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  cameraButtonText: { color: "white", fontWeight: "bold" },
+  previewImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 10,
+    marginVertical: 10,
   },
   input: {
-    height: 50,
-    borderColor: "#ddd",
+    backgroundColor: "white",
     borderWidth: 1,
+    borderColor: "#ddd",
+    padding: 10,
     borderRadius: 8,
-    paddingHorizontal: 15,
-    backgroundColor: "#fff",
-    marginBottom: 15,
+    marginBottom: 10,
   },
   button: {
-    height: 50,
-    backgroundColor: "#4CAF50",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 8,
-    marginTop: 20,
+    backgroundColor: "green",
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 10,
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+  buttonText: { color: "white", textAlign: "center", fontWeight: "bold" },
 });
