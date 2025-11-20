@@ -17,7 +17,7 @@ return new class extends Migration
                 ->on('staff')
                 ->onDelete('cascade');
 
-            $table->enum('problem_statement', ['Technical Issue', 'Billing Issue', 'General Query']);
+            $table->enum('problem_statement', ['Technical Issue', 'Billing Issue', 'General Query','Quotation Request','Other']);
 
             // NEW correct field
             $table->string('description')->nullable();

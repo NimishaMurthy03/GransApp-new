@@ -12,7 +12,11 @@ class OfficeStaff extends Authenticatable
     protected $table = "office_staff";
 
     protected $fillable = [
-        'name', 'email', 'phone', 'password'
+        'name',
+        'role',      // 👈 ADD THIS
+        'email',
+        'phone',
+        'password'
     ];
 
     protected $hidden = [

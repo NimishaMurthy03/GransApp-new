@@ -10,7 +10,7 @@ class SuperAdminController extends Controller
 
         $request->validate([
             'email' => 'required|min:6',
-            'password'=> 'required|min:8'
+            'password'=> 'required|min:5'
         ]);
 
         $superAdmin = SuperAdmin::where('email', $request->email)->first();

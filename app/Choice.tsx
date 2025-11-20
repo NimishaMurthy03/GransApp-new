@@ -11,23 +11,23 @@ const HomeScreen: React.FC = () => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push("/CustomerSignUp")}
+        onPress={() => router.push("/CustomerLogin")}
       >
-        <Text style={styles.buttonText}>Customer Login</Text>
+        <Text style={styles.buttonText}>Customer</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push("/StaffSignUp")}
+        onPress={() => router.push("/StaffLogin")}
       >
-        <Text style={styles.buttonText}>Staff Login</Text>
+        <Text style={styles.buttonText}>Staff</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push("/SuperAdminSignup")}
+        onPress={() => router.push("/SuperAdminLogin")}
       >
-        <Text style={styles.buttonText}>Super Admin Login</Text>
+        <Text style={styles.buttonText}>Admin</Text>
       </TouchableOpacity>
 
     </View>

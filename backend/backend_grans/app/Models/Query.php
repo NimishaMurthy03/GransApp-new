@@ -16,11 +16,18 @@ class Query extends Model
         'phone_number',
         'name',
         'email',
-        'photo',  
+        'photo',
     ];
 
+    // For super admin view (all assigned engineers)
     public function assignCalls()
     {
         return $this->hasMany(AssignCall::class, 'query_id');
+    }
+
+    // For staff/assign call button (single assignment)
+    public function assignCall()
+    {
+        return $this->hasOne(AssignCall::class, 'query_id');
     }
 }

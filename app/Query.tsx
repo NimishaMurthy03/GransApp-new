@@ -70,14 +70,10 @@ formData.append(
     uri: image,
     name: `photo_${Date.now()}.${fileType}`,
     type: `image/${fileType}`,
-  } as any   // ← THIS FIXES TS ERROR
+  } as any   
 );
 
-
-
-  
-
-  setLoading(true);
+ setLoading(true);
 
   try {
     const response = await axios.post(`${BASE_URL}/api/postQuery`, formData, {
@@ -111,6 +107,8 @@ formData.append(
           <Picker.Item label="Technical Issue" value="Technical Issue" />
           <Picker.Item label="Billing Issue" value="Billing Issue" />
           <Picker.Item label="General Query" value="General Query" />
+          <Picker.Item label="Quotation Request" value="Feedback" />
+          <Picker.Item label="Other" value="Other" />
         </Picker>
       </View>
 

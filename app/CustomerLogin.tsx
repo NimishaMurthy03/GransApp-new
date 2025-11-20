@@ -69,8 +69,16 @@ export default function CustomerLogin() {
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 
+      {/* Forgot Password */}
       <TouchableOpacity onPress={() => router.push("/ForgotPassword")}>
         <Text style={styles.forgotText}>Forgot Password?</Text>
+      </TouchableOpacity>
+
+      {/* NEW - Signup Link */}
+      <TouchableOpacity onPress={() => router.push("/CustomerSignUp")}>
+        <Text style={styles.signupText}>
+          New user? <Text style={{ fontWeight: "bold" }}>Sign up</Text>
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -117,5 +125,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   buttonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
-  forgotText: { color: "#007AFF", marginTop: 10, textDecorationLine: "underline" },
+  forgotText: {
+    color: "#007AFF",
+    marginTop: 10,
+    textDecorationLine: "underline",
+  },
+  signupText: {
+    color: "#444",
+    marginTop: 10,
+    fontSize: 16,
+    textDecorationLine: "underline",
+  },
 });

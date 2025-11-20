@@ -13,10 +13,7 @@ const SuperAdminLogin: React.FC = () => {
       Alert.alert("Error", "All fields are required.");
       return;
     }
-
-    // Here, you can perform authentication logic (e.g., API call).
-    // If successful, navigate to dashboard:
-    router.push("/SuperAdminDashboard"); // Replace with your actual route
+    router.push("/SuperAdminDashboard"); 
   };
 
   return (
@@ -47,6 +44,14 @@ const SuperAdminLogin: React.FC = () => {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
+
+      {/* NEW SIGNUP LINK */}
+      <TouchableOpacity onPress={() => router.push("/SuperAdminSignup")}>
+        <Text style={styles.signupText}>
+          New ? <Text style={{ fontWeight: "bold" }}>Sign up</Text>
+        </Text>
+      </TouchableOpacity>
+
     </View>
   );
 };
@@ -87,5 +92,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+  },
+
+  signupText: {
+    color: "#2b0f73",
+    marginTop: 15,
+    fontSize: 16,
+    textDecorationLine: "underline",
   },
 });

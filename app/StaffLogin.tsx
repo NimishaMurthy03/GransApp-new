@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-
 import {
   View,
   Text,
@@ -18,28 +17,25 @@ export default function StaffLogin() {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-  if (!email || !password) {
-    Alert.alert("Error", "Email and password required");
-    return;
-  }
+    if (!email || !password) {
+      Alert.alert("Error", "Email and password required");
+      return;
+    }
 
-  try {
-    const response = await axios.post(`${BASE_URL}/api/stafflogin`, {
-      email,
-      password,
-    });
+    try {
+      const response = await axios.post(`${BASE_URL}/api/stafflogin`, {
+        email,
+        password,
+      });
 
-    console.log("LOGIN RESPONSE: ", response.data);
-
-    Alert.alert("Success", "Login successful!");
-
-    router.push("/DisplayQueryStaff");
-  } catch (error: any) {
-    console.log("LOGIN ERROR:", error.response?.data || error);
-    Alert.alert("Error", error.response?.data?.message || "Login failed");
-  }
-};
-
+      console.log("LOGIN RESPONSE: ", response.data);
+      Alert.alert("Success", "Login successful!");
+      router.push("/DisplayQueryStaff");
+    } catch (error: any) {
+      console.log("LOGIN ERROR:", error.response?.data || error);
+      Alert.alert("Error", error.response?.data?.message || "Login failed");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -64,6 +60,14 @@ export default function StaffLogin() {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
+
+      {/* New User Signup Link */}
+      <TouchableOpacity onPress={() => router.push("/StaffSignUp")}>
+        <Text style={styles.signupText}>
+          New user? <Text style={{ fontWeight: "bold" }}>Sign up</Text>
+        </Text>
+      </TouchableOpacity>
+
     </View>
   );
 }
@@ -103,5 +107,11 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  signupText: {
+    color: "#007BFF",
+    marginTop: 10,
+    fontSize: 16,
+    textDecorationLine: "underline",
   },
 });

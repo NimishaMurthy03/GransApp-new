@@ -84,5 +84,43 @@ class StaffController extends Controller
             'staff'   => $staff
         ], 200);
     }
+    // ============================ OFFICE STAFF ADDITION ============================
+    
+    public function addOfficeStaff(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string',
+        'role' => 'nullable|string',
+        'email' => 'required|email|unique:office_staff,email',
+        'phone' => 'nullable|string',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validation error',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+    \Log::info("ROLE RECEIVED:", [$request->role]);
+    
+    $staff = OfficeStaff::create([
+        'name' => $request->name,
+        'role' => $request->role,
+        'email' => $request->email,
+        'phone' => $request->phone,
+        'password' => bcrypt("12345678")  
+    ]);
+
+    return response()->json([
+        'message' => 'Office Staff added successfully',
+        'staff' => $staff
+    ], 201);
 }
+public function getOfficeStaff()
+{
+    return response()->json(OfficeStaff::all());
+}
+
+}
+
 
